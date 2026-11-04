@@ -218,9 +218,7 @@ namespace mu2e
     {
       //check for any error flags, but ignore calibration flags
       auto flags = iter->GetRecoPulseFlags();
-      flags.set(CrvRecoPulseFlagEnums::noCalibConstPulseArea,0);
-      flags.set(CrvRecoPulseFlagEnums::noCalibConstPulseHeight,0);
-      if(!flags.none()) continue;
+      if(flags.test(CrvRecoPulseFlagEnums::failedFit)) continue;
 
       int barIndex = iter->GetScintillatorBarIndex().asInt();
       int SiPM = iter->GetSiPMNumber();
