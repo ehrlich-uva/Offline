@@ -563,10 +563,47 @@ namespace mu2e
       //remove additional time due to electronics response and processes such as scintillation/WLS decay times
       avgHitTime-=_timeOffset;   //we could use a non-const parameter by taking the pulse widths of this cluster into consideration
 
+      //shift the pulse time ranges of both sides to the hit position
+      double startTimeAdjusted0=avgHitTime;
+      double startTimeAdjusted1=avgHitTime;
+      double endTimeAdjusted0=avgHitTime;
+      double endTimeAdjusted1=avgHitTime;
+      if(sideHits[0]>0)
+      {
+        double dt=sideTimes[0]-avgHitTime;
+        startTimeAdjusted0=sideTimesMin[0]-dt;
+        endTimeAdjusted0=sideTimesMax[0]-dt;
+      }
+      if(sideHits[1]>0)
+      {
+        double dt=sideTimes[1]-avgHitTime;
+        startTimeAdjusted1=sideTimesMin[1]-dt;
+        endTimeAdjusted1=sideTimesMax[1]-dt;
+      }
+      double startTimeAdjusted=std::min(startTimeAdjusted0,startTimeAdjusted1);
+      double endTimeAdjusted=std::max(endTimeAdjusted0,endTimeAdjusted1);
+
+      if(!hitPosAndTimeCalculated)  //if hit position couldn't be calculated, the center position was assumed
+                                    //expand the adjusted time window to include all possible hit position along the counter
+      {
+        double maxHalfLength=_sectorTypeMap[crvSectorType].maxHalfLength;
+        if(sideHits[0]>0 && sideHits[1]>0)  //this is a special case, where the avgHitTime does not depend on a longitudinal position
+        {                                   //(see calculation above, where the position actually cancels).
+          startTimeAdjusted=std::min(sideTimesMin[0],sideTimesMin[1])-2.0*maxHalfLength/_fiberSignalSpeed-_timeOffset;
+          endTimeAdjusted=std::max(sideTimesMax[0],sideTimesMax[1])-_timeOffset;
+        }
+        else
+        {
+          startTimeAdjusted-=maxHalfLength/_fiberSignalSpeed;
+          endTimeAdjusted+=maxHalfLength/_fiberSignalSpeed;
+        }
+      }
+
+
       //insert the cluster information into the vector of the crv coincidence clusters
       crvCoincidenceClusterCollection->emplace_back(crvSectorType, startTime, endTime, PEs, crvRecoPulses, slope, layers,
                                                     sideHits, sidePEs, sideTimes, avgHitTime, avgHitPos,
-                                                    hitPosAndTimeCalculated);
+                                                    hitPosAndTimeCalculated, startTimeAdjusted, endTimeAdjusted);
     } //loop through all clusters
   } //end cluster properies
 

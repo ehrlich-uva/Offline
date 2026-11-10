@@ -1102,7 +1102,7 @@ void DataInterface::fillEvent(boost::shared_ptr<ContentSelector> const &contentS
       size_t index = recoPulse.GetScintillatorBarIndex().asUint();
       int    sipm  = recoPulse.GetSiPMNumber();
       double time  = recoPulse.GetPulseTime();
-      int    PEs   = recoPulse.GetPEs();
+      float  PEs   = recoPulse.GetPEs();
 
       size_t channel  = index*mu2e::CRVId::nChanPerBar + sipm;
       double recoPulsePedestal = _calib->pedestal(channel);
@@ -1123,7 +1123,7 @@ void DataInterface::fillEvent(boost::shared_ptr<ContentSelector> const &contentS
           crvbar->second->getComponentInfo()->setText(5,"Reco pulse SiPM2 PEs/time: ");
           crvbar->second->getComponentInfo()->setText(6,"Reco pulse SiPM3 PEs/time: ");
         }
-        crvbar->second->getComponentInfo()->expandLine(sipm+3,Form("%iPEs/%.1fns",PEs,time/CLHEP::ns));
+        crvbar->second->getComponentInfo()->expandLine(sipm+3,Form("%.1fPEs/%.1fns",PEs,time/CLHEP::ns));
 
         //each digi collection and each SiPM gets its own multigraph
         std::vector<boost::shared_ptr<TObject> > &v=crvbar->second->getComponentInfo()->getHistVector();
